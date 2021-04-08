@@ -32,8 +32,13 @@ router.route('/products')
     })
     // insere um pedido
     .post((req, res, next) => {
+        const product = {
+            nome: req.body.nome,
+            preco: req.body.preco
+        };
         res.status(201).send({
-            msg: 'usando o post dentro da rota products'
+            msg: 'usando o post dentro da rota products',
+            productCreated: product
         });
     })
     // altera um produto

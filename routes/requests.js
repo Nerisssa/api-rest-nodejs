@@ -18,7 +18,7 @@ router.route('/requests/:id_product')
     .delete((req, res, next) => {
         idProduct = req.params.id_product;
         res.status(200).send({
-            msg: 'arquivo' + req.body.idProduct + ' foi destruido'
+            msg: 'arquivo ' + req.body.idProduct + ' foi destruido'
         });
     })
 router.route('/requests')
@@ -30,8 +30,13 @@ router.route('/requests')
     })
     // insere um pedido
     .post((req, res, next) => {
+        const requests = {
+            idProduct: req.body.idProduct,
+            quantidade: req.body.quantidade
+        };
         res.status(201).send({
-            msg: 'usando o post dentro da rota requests'
+            msg: 'usando o post dentro da rota requests',
+            productRequest: requests
         });
     })
     // altera um produto
