@@ -1,50 +1,101 @@
 const express = require('express');
 const router = express.Router();
+const mysql = require('../mysql').pool;
 
 router.route('/products/:id_product')
     // retorna um pedido especifico
     .get((req, res, next) => {
-        idProduct = req.params.id_product;
-        if (idProduct === 'chavemestra') {
-            res.status(200).send({
-                msg: 'você está logado com a chave mestre',
-                id: idProduct
-            });    
-        } else {
-            res.status(200).send({
-                msg: 'você está logado com a chave normal',
-            });
-        }
+        mysql.execute(
+            'SELECT * FROM produtos WHERE idprodutos = ?;',
+            [req.params.id_product], function(err, results, fields) {
+                if (err) {
+                    return res.status(500).send({
+                        error: err, 
+                        response: null
+                    })
+                }
+                res.status(200).send({
+                    response: results
+                })
+            }
+        )
     })
     // deleta um pedido especifico
     .delete((req, res, next) => {
-        idProduct = req.params.id_product;
-        res.status(200).send({
-            msg: 'arquivo' + req.body.idProduct + ' foi destruido'
-        });
+        mysql.execute(
+            'DELETE FROM produtos WHERE idprodutos = ?;',
+            [req.params.id_product], function(err, results, fields) {
+                if (err) {
+                    return res.status(500).send({
+                        erro: err,
+                        response: null
+                    })
+                }
+                res.status(202).send({
+                    response: "Dado excluido com sucesso!",
+                    responses: results
+                })
+            }
+        )
     })
 router.route('/products')
     // retorna todos os pedidos
     .get((req, res, next) => {
-        res.status(200).send({
-            msg: 'usando o get dentro da rota products'
-        });
+        mysql.execute(
+            'SELECT * FROM produtos;', function(err, results, fields) {
+                if (err) {
+                    return res.status(500).send({
+                        error: err,
+                        response: null
+                    })
+                }
+                res.status(200).send({
+                    response: results
+                })
+            }
+        )
     })
     // insere um pedido
     .post((req, res, next) => {
-        const product = {
-            nome: req.body.nome,
-            preco: req.body.preco
-        };
-        res.status(201).send({
-            msg: 'usando o post dentro da rota products',
-            productCreated: product
-        });
+        mysql.execute(
+            'INSERT INTO produtos (nome, preco) VALUES (?,?);',
+            [req.body.nome, req.body.preco], function(err, results, fields) {
+                if (err) {
+                    return res.status(500).send({
+                        error: err,
+                        response: null
+                    })
+                }
+                res.status(201).send({
+                    message: 'Produto adicionado com sucesso!',
+                    idProduct: results.insertId
+                })
+            }
+        )
     })
     // altera um produto
     .patch((req, res, next) => {
-        res.status(201).send({
-            msg: 'usando o path dentro da rota products'
-        });
+        mysql.execute(
+            `UPDATE produtos 
+                SET nome = ?,
+                    preco = ?
+                WHERE idprodutos = ?;`,
+            [
+                req.body.nome,
+                req.body.preco,
+                req.body.idprodutos
+            ], function(err, results, fields) {
+                if (err) {
+                    return res.status(500).send({
+                        error: err,
+                        response: null
+                    })
+                }
+                res.status(202).send({
+                    response: "Produto alterado com sucesso!",
+                    resposes: results
+                })
+            }
+        )
     })
 module.exports = router;
